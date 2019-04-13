@@ -17,7 +17,7 @@ struct buffer_saida {
 
 typedef struct buffer_saida buffer_saida;
 
-buffer_saida *criarBufferSaida();
+buffer_saida *criarBufferSaida(void);
 void novoItemSaida(buffer_saida *buf, char *arquivo, int num_linhas);
 int bufferEstaVazio(buffer_saida *buf);
 

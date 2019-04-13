@@ -7,9 +7,11 @@
 #include <unistd.h>
 
 #include "processamento.h"
+#include "bufsaida.h"
 
 struct arquivo {
     char *path;
+    buffer_saida *buff;
     struct arquivo *prox;
 };
 
@@ -31,9 +33,9 @@ int main(int argc, char **argv) {
     }
     
     if (regcomp(&regex, argv[2], REG_EXTENDED|REG_NOSUB) != 0) {
-		fprintf(stderr,"erro regcomp\n");
-		exit(1);
-	}
+        fprintf(stderr,"erro regcomp\n");
+        exit(1);
+    }
     
     lista_arquivos = NULL;
     listarDiretorio(argv[3]);
@@ -42,13 +44,14 @@ int main(int argc, char **argv) {
     pthread_mutex_init(&mutex_dir, NULL);
     n_threads = atoi(argv[1]);
     threads = malloc(n_threads * sizeof(pthread_t));
-    inicializacao();
-
+    
     for (i = 0; i < n_threads; i++)
         pthread_create(&threads[i], NULL, thread, NULL);
     
     for (i = 0; i < n_threads; i++)
         pthread_join(threads[i], NULL);
+    
+    imprimir();
     
     return 0;
 }
@@ -90,16 +93,32 @@ void listarDiretorio(char *dir) {
 }
 
 void *thread() {
-    char *arquivo;
+    struct arquivo *arquivo_curr;
     FILE *f;
     while (1) {
         if (proximo_arq == NULL) return NULL;
         pthread_mutex_lock(&mutex_dir);
-        arquivo = proximo_arq->path;
+        arquivo_curr = proximo_arq;
         proximo_arq = proximo_arq->prox;
         pthread_mutex_unlock(&mutex_dir);
-        f = fopen(arquivo, "r");
-        processar(arquivo, f, regex);
+        
+        f = fopen(arquivo_curr->path, "r");
+        arquivo_curr->buff = processar(arquivo_curr->path, f, regex);
         fclose(f);
     }
+}
+
+void imprimir () {
+    proximo_arq = lista_arquivos;
+    
+    while (proximo_arq != NULL) {
+        descarregarBuffer(proximo_arq->buff);
+        proximo_arq = proximo_arq->prox;
+    }
+}
+
+void descarregarBuffer(buffer_saida *buf) {
+    item_saida *item;
+    FOREACH(buf, item, printf("%s: %d\n", item->arquivo, item->num_linhas));
+    printf("%s: %d\n", controle->arquivo, num_linhas);
 }
