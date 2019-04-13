@@ -21,6 +21,8 @@ pthread_mutex_t mutex_dir;
 
 void listarDiretorio(char *dir);
 void *thread();
+void imprimir();
+void descarregarBuffer(buffer_saida *buf);
 
 int main(int argc, char **argv) {
     pthread_t *threads;
@@ -108,7 +110,7 @@ void *thread() {
     }
 }
 
-void imprimir () {
+void imprimir() {
     proximo_arq = lista_arquivos;
     
     while (proximo_arq != NULL) {
@@ -120,5 +122,4 @@ void imprimir () {
 void descarregarBuffer(buffer_saida *buf) {
     item_saida *item;
     FOREACH(buf, item, printf("%s: %d\n", item->arquivo, item->num_linhas));
-    printf("%s: %d\n", controle->arquivo, num_linhas);
 }

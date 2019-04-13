@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <regex.h>
 
+#include "bufsaida.h"
+
 void inicializacao();
-void processar(char *arq, FILE *f, regex_t regex);
+buffer_saida *processar(char *arq, FILE *f, regex_t regex);
 
 #endif
